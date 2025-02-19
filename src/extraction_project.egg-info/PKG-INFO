@@ -1,0 +1,10 @@
+Metadata-Version: 2.2
+Name: extraction_project
+Version: 0.1.0
+Summary: "Un package pour extraire des données"
+Author: "mouhamed-fadel"
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: psycopg2
+Requires-Dist: itables
+Requires-Dist: scikit-learn

@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+setup.cfg
+src/extraction/__init__.py
+src/extraction/correction_anomalies.py
+src/extraction/data_process.py
+src/extraction/general.py
+src/extraction/model.py
+src/extraction/preprocessing.py
+src/extraction/utils.py
+src/extraction/utils2.py
+src/extraction_project.egg-info/PKG-INFO
+src/extraction_project.egg-info/SOURCES.txt
+src/extraction_project.egg-info/dependency_links.txt
+src/extraction_project.egg-info/requires.txt
+src/extraction_project.egg-info/top_level.txt
