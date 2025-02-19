@@ -311,8 +311,8 @@ def process_directory(input_dir, output_dir, tracker_file):
     print(tracker_df['statut'].value_counts())
 
 if __name__ == "__main__":
-    input_dir = "M://str-dgri-gecir-donnees-fiscales//x-pour MF-SAMB//données-xml-à-traiter"
-    output_dir = "M://str-dgri-gecir-donnees-fiscales//x-pour MF-SAMB//output"
-    tracker_file = "M://str-dgri-gecir-donnees-fiscales//x-pour MF-SAMB//output//processed_files_tracker.parquet"
+    input_dir = os.getenv('INPUT_DIR', 'data/input')
+    output_dir = os.getenv('OUTPUT_DIR', 'data/output')
+    tracker_file = os.getenv('TRACKER_FILE', 'data/output/processed_files_tracker.parquet')
     
     process_directory(input_dir, output_dir, tracker_file)
