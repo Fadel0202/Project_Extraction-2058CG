@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 import os
 import re
 from typing import Tuple, Optional, Dict, List
+from pathlib import Path
 
 class LuhnValidator:
     """
@@ -149,23 +150,19 @@ class SIRENAnomalyDetector:
         
         return result_df
 
-def process_directory(directory: str, contamination: float = 0.1) -> pd.DataFrame:
-    """
-    Traite tous les fichiers d'un répertoire
-    """
-    print("Début de la détection des anomalies SIREN...")
-    
+def process_data(directory, contamination=0.1):
     # Lecture des données
     all_data = pd.DataFrame()
-    for file in os.listdir(directory):
-        if file.endswith('.parquet'):
-            try:
-                df = pd.read_parquet(os.path.join(directory, file))
-                df['source_file'] = file
-                all_data = pd.concat([all_data, df]) if not all_data.empty else df
-            except Exception as e:
-                print(f"Erreur lors de la lecture de {file}: {str(e)}")
-                continue
+    directory = Path(directory)
+    
+    for file in directory.glob('*.parquet'):
+        try:
+            df = pd.read_parquet(file)
+            df['source_file'] = file.name
+            all_data = pd.concat([all_data, df]) if not all_data.empty else df
+        except Exception as e:
+            print(f"Erreur lors de la lecture de {file}: {str(e)}")
+            continue
     
     # Détection et correction des anomalies
     detector = SIRENAnomalyDetector(contamination=contamination)
@@ -173,7 +170,7 @@ def process_directory(directory: str, contamination: float = 0.1) -> pd.DataFram
     
     # Sauvegarde des résultats
     anomalies_df = results[results['is_anomaly']].copy()
-    output_file = os.path.join(directory, "anomalies_siren_luhn.parquet")
+    output_file = directory / "anomalies_siren_luhn.parquet"
     anomalies_df.to_parquet(output_file)
     
     # Statistiques
@@ -187,5 +184,5 @@ def process_directory(directory: str, contamination: float = 0.1) -> pd.DataFram
     return results
 
 if __name__ == "__main__":
-    # Exemple d'utilisation
-    results = process_directory("M://str-dgri-gecir-donnees-fiscales//x-pour MF-SAMB//output")
+    input_dir = os.getenv('INPUT_DIR', 'data/input')
+    process_data(input_dir)
