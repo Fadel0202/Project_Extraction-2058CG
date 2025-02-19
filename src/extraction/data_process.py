@@ -39,6 +39,22 @@ def get_efisc_codes():
         'depose_neant': '305747'
     }
 
+def get_data_directory():
+    """Renvoie le chemin du répertoire de données."""
+    return Path(os.getenv('DATA_DIRECTORY', 'data'))
+
+def load_data(file_name):
+    """Charge les données à partir d'un fichier parquet."""
+    data_directory = get_data_directory()
+    file_path = data_directory / file_name
+    return pd.read_parquet(file_path)
+
+def save_data(df, file_name):
+    """Sauvegarde les données dans un fichier parquet."""
+    data_directory = get_data_directory()
+    file_path = data_directory / file_name
+    df.to_parquet(file_path, index=False)
+
 def process_dates(df):
     """Traite les dates et calcule le millésime."""
     if df.empty:
