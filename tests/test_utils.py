@@ -32,8 +32,11 @@ class TestFileOperations(unittest.TestCase):
     def tearDown(self):
         """Nettoyage après les tests"""
         # Suppression du répertoire de test et son contenu
-        for file in os.listdir(self.test_dir):
-            os.remove(os.path.join(self.test_dir, file))
+        for root, dirs, files in os.walk(self.test_dir, topdown=False):
+            for name in files:
+                os.remove(os.path.join(root, name))
+            for name in dirs:
+                os.rmdir(os.path.join(root, name))
         os.rmdir(self.test_dir)
 
     @patch('pandas.read_parquet')
