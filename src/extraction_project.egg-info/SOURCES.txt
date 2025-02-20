@@ -14,3 +14,9 @@ src/extraction_project.egg-info/SOURCES.txt
 src/extraction_project.egg-info/dependency_links.txt
 src/extraction_project.egg-info/requires.txt
 src/extraction_project.egg-info/top_level.txt
+tests/test_data_process.py
+tests/test_model.py
+tests/test_preprocessing.py
+tests/test_utils.py
+tests/test_utils1.py
+tests/test_utils2.py
