@@ -1,0 +1,8 @@
+<root>
+            <depot>
+                <enteteDepot siren="123456789" idDepot="DEP001" dateDebPer="2023-01-01" dateFinPer="2023-12-31" />
+                <formulaire noForm="2058CG">
+                    <efisc iRepEF="1" cdEfisc="909475" vlEfisc="ABC123"/>
+                </formulaire>
+            </depot>
+        </root>
