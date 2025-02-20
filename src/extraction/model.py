@@ -150,6 +150,10 @@ class SIRENAnomalyDetector:
         
         return result_df
 
+import os
+import pandas as pd
+from pathlib import Path
+
 def process_data(directory, contamination=0.1):
     # Lecture des données
     all_data = pd.DataFrame()
