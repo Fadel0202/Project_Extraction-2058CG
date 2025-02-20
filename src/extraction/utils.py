@@ -2,6 +2,7 @@
 import pandas as pd
 import numpy as np
 import os
+import re
 
 # Pour sauvegarder en CSV (plus léger)
 def parquet_to_csv(directory):
@@ -257,22 +258,16 @@ def create_mere_fille_file(path_millesime_cir, path_2058cg_23, path_2058cg_22, o
 # Fonction pour corriger les SIREN
 def correct_siren(value):
     try:
-        # Convertir la valeur en chaîne
         value_str = str(value)
-        
-        # Si la valeur est exactement "03.56e+08", remplacer par "356000000"
         if value_str.lower() == "03.56e+08":
             return "356000000"
-        
-        # Utiliser une expression régulière pour extraire un SIREN valide
         match = re.search(r'\d{9}', value_str)
         if match:
             return match.group()
-        
-        # Sinon, tronquer à 9 caractères (au cas où il s'agit d'un SIREN malformé mais pas mélangé)
-        return value_str[:9]
+        if len(value_str) >= 9:
+            return value_str[:9]
+        return value_str
     except:
-        # Retourner la valeur initiale en cas d'erreur
         return value
 
 

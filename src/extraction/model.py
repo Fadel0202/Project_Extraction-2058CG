@@ -91,9 +91,6 @@ class SIRENAnomalyDetector:
         return None
 
     def fit_predict(self, df: pd.DataFrame) -> pd.DataFrame:
-        """
-        Détecte et corrige les anomalies SIREN
-        """
         result_df = df.copy()
         
         # Identification des SIREN invalides
@@ -102,13 +99,10 @@ class SIRENAnomalyDetector:
                 if pd.isna(siren):
                     return False
                 siren_str = str(siren).strip()
-                # Si la chaîne n'est pas numérique, c'est invalide
                 if not siren_str.isdigit():
                     return False
-                # Si c'est un SIRET, on prend les 9 premiers chiffres
                 if len(siren_str) == 14:
                     return self.luhn_validator.luhn_checksum(siren_str[:9])
-                # Sinon on vérifie si c'est un SIREN valide
                 return len(siren_str) == 9 and self.luhn_validator.luhn_checksum(siren_str)
             except Exception:
                 return False
@@ -122,19 +116,16 @@ class SIRENAnomalyDetector:
                 
             original_siren = str(row['siren_societe']).strip()
             
-            # Si SIRET valide, on garde les 9 premiers chiffres
             if len(original_siren) == 14 and original_siren.isdigit():
                 potential_siren = original_siren[:9]
                 if self.luhn_validator.luhn_checksum(potential_siren):
                     return potential_siren, "CORRECTION_SIRET"
             
-            # Recherche dans les autres champs
             fields = [
                 ('denomination_societe', 'CORRECTION_DENOMINATION'),
                 ('complement_denomination', 'CORRECTION_COMPLEMENT'),
                 ('forme_juridique', 'CORRECTION_FORME')
             ]
-            
             for field, source in fields:
                 if pd.notna(row[field]):
                     potential_siren = self._extract_potential_siren(row[field])
@@ -142,11 +133,10 @@ class SIRENAnomalyDetector:
                         return potential_siren, source
                         
             return original_siren, "NON_CORRIGE"
-            
-        # Application des corrections
+
         corrections = result_df[result_df['is_anomaly']].apply(correct_siren, axis=1)
-        result_df.loc[result_df['is_anomaly'], 'siren_corrige'] = corrections.str[0]
-        result_df.loc[result_df['is_anomaly'], 'source_correction'] = corrections.str[1]
+        result_df.loc[result_df['is_anomaly'], 'siren_corrige'] = corrections.apply(lambda x: x[0])
+        result_df.loc[result_df['is_anomaly'], 'source_correction'] = corrections.apply(lambda x: x[1])
         
         return result_df
 

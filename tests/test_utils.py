@@ -183,21 +183,3 @@ class TestFileOperations(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
-
-def correct_siren(value):
-    try:
-        value_str = str(value)
-        if value_str.lower() == "03.56e+08":
-            return "356000000"
-        match = re.search(r'\d{9}', value_str)
-        if match:
-            return match.group()
-        if len(value_str) >= 9:
-            return value_str[:9]
-        return value_str
-    except:
-        return value
-
-corrections = result_df[result_df['is_anomaly']].apply(correct_siren, axis=1)
-result_df.loc[result_df['is_anomaly'], 'siren_corrige'] = corrections.apply(lambda x: x[0])
-result_df.loc[result_df['is_anomaly'], 'source_correction'] = corrections.apply(lambda x: x[1])
