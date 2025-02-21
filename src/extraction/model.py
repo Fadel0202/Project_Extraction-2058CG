@@ -91,7 +91,16 @@ class SIRENAnomalyDetector:
         return None
 
     def fit_predict(self, df: pd.DataFrame) -> pd.DataFrame:
+        if df is None:
+            raise ValueError("Le DataFrame d'entrée ne doit pas être None")
+        
         result_df = df.copy()
+        
+        if result_df.empty:
+            result_df['is_anomaly'] = []
+            result_df['siren_corrige'] = []
+            result_df['source_correction'] = []
+            return result_df
         
         # Identification des SIREN invalides
         def validate_siren(siren) -> bool:

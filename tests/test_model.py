@@ -101,6 +101,7 @@ class TestSIRENAnomalyDetector(unittest.TestCase):
         empty_df = pd.DataFrame(columns=self.sample_data.columns)
         result_empty = self.detector.fit_predict(empty_df)
         self.assertTrue(result_empty.empty)
+        self.assertTrue(all(col in result_empty.columns for col in ['is_anomaly', 'siren_corrige', 'source_correction']))
         
         # DataFrame avec valeurs manquantes
         df_with_na = self.sample_data.copy()
