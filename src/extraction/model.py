@@ -94,6 +94,9 @@ class SIRENAnomalyDetector:
         if df is None:
             raise ValueError("Le DataFrame d'entrée ne doit pas être None")
         
+        if not isinstance(df, pd.DataFrame):
+            raise TypeError("L'entrée doit être un DataFrame")
+        
         result_df = df.copy()
         
         if result_df.empty:
