@@ -3,6 +3,7 @@ from datetime import datetime
 import pandas as pd
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from extraction.model import SIRENAnomalyDetector
 
 def format_date(date_str):
     """Formate une chaîne de date au format YYYY-MM-DD."""
@@ -225,7 +226,7 @@ def extract_data(xml_file):
     except Exception as e:
         return pd.DataFrame(), str(e)
 
-def process_directory(input_dir, output_dir, tracker_file):
+def process_directory(input_dir: str, output_dir: str, tracker_file: str, contamination: float = 0.1):
     """Traite tous les fichiers XML d'un répertoire."""
     print("Démarrage du traitement...")
     
@@ -310,9 +311,43 @@ def process_directory(input_dir, output_dir, tracker_file):
     print("\nStatut des traitements :")
     print(tracker_df['statut'].value_counts())
 
+def process_directory(directory: str, contamination: float = 0.1) -> pd.DataFrame:
+    # Lecture des données
+    all_data = pd.DataFrame()
+    directory = Path(directory)
+    
+    for file in directory.glob('*.parquet'):
+        try:
+            df = pd.read_parquet(file)
+            df['source_file'] = file.name
+            all_data = pd.concat([all_data, df]) if not all_data.empty else df
+        except Exception as e:
+            print(f"Erreur lors de la lecture de {file}: {str(e)}")
+            continue
+    
+    # Détection et correction des anomalies
+    detector = SIRENAnomalyDetector(contamination=contamination)
+    results = detector.fit_predict(all_data)
+    
+    # Sauvegarde des résultats
+    anomalies_df = results[results['is_anomaly']].copy()
+    output_file = directory / "anomalies_siren_luhn.parquet"
+    anomalies_df.to_parquet(output_file)
+    
+    # Statistiques
+    print("\nSTATISTIQUES DES ANOMALIES SIREN")
+    print("=" * 50)
+    print(f"Total enregistrements analysés: {len(all_data)}")
+    print(f"Nombre d'anomalies détectées: {len(anomalies_df)}")
+    print("\nSources des corrections:")
+    print(anomalies_df['source_correction'].value_counts())
+    
+    return results
+
 if __name__ == "__main__":
     input_dir = os.getenv('INPUT_DIR', 'data/input')
     output_dir = os.getenv('OUTPUT_DIR', 'data/output')
     tracker_file = os.getenv('TRACKER_FILE', 'data/output/processed_files_tracker.parquet')
     
     process_directory(input_dir, output_dir, tracker_file)
+    process_directory(input_dir)

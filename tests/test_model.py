@@ -87,7 +87,7 @@ class TestSIRENAnomalyDetector(unittest.TestCase):
         
         # Test du processus complet
         from extraction.data_process import process_directory
-        results = process_directory("dummy_dir", contamination=0.1)
+        results = process_directory("dummy_dir", "dummy_output_dir", "dummy_tracker_file", contamination=0.1)
         
         # Vérifications
         self.assertIsInstance(results, pd.DataFrame)
