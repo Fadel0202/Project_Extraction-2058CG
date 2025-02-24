@@ -226,121 +226,50 @@ def extract_data(xml_file):
     except Exception as e:
         return pd.DataFrame(), str(e)
 
-def process_directory(input_dir: str, output_dir: str, tracker_file: str, contamination: float = 0.1):
-    """Traite tous les fichiers XML d'un répertoire."""
-    print("Démarrage du traitement...")
+def process_directory(input_dir: str, output_dir: str = None, tracker_file: str = None, contamination: float = 0.1) -> pd.DataFrame:
+    """
+    Traite les fichiers d'un répertoire
+    """
+    directory = Path(input_dir)
+    all_data = []
     
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    # Liste tous les fichiers parquet dans le répertoire
+    parquet_files = list(directory.glob('*.parquet'))
     
-    if Path(tracker_file).exists():
-        tracker_df = pd.read_parquet(tracker_file)
-        processed_files = set(tracker_df['fichier'])
-    else:
-        tracker_df = pd.DataFrame(columns=['fichier', 'date_traitement', 'nombre_formulaires', 'statut', 'message_erreur'])
-        processed_files = set()
+    if not parquet_files:
+        print(f"Aucun fichier parquet trouvé dans {input_dir}")
+        return pd.DataFrame()
     
-    xml_files = list(Path(input_dir).glob('**/*.xml'))
-    if not xml_files:
-        print("Aucun fichier XML trouvé.")
-        return
-    
-    print(f"Nombre de fichiers à traiter : {len(xml_files)}")
-    
-    for xml_file in xml_files:
-        xml_path = str(xml_file)
-        
-        if xml_path in processed_files:
-            print(f"Fichier déjà traité : {xml_file}")
-            continue
-            
-        print(f"\nTraitement de {xml_file}")
-        
-        df, extract_error = extract_data(xml_file)
-        
-        if extract_error:
-            print(f"Erreur lors de l'extraction : {extract_error}")
-            tracker_df = pd.concat([tracker_df, pd.DataFrame({
-                'fichier': [xml_path],
-                'date_traitement': [datetime.now()],
-                'nombre_formulaires': [0],
-                'statut': ['ERREUR'],
-                'message_erreur': [f"Erreur d'extraction: {extract_error}"]
-            })], ignore_index=True)
-            continue
-            
-        if df.empty:
-            print("Aucune donnée extraite")
-            tracker_df = pd.concat([tracker_df, pd.DataFrame({
-                'fichier': [xml_path],
-                'date_traitement': [datetime.now()],
-                'nombre_formulaires': [0],
-                'statut': ['VIDE'],
-                'message_erreur': ["Aucune donnée extraite"]
-            })], ignore_index=True)
-            continue
-        
-        success, update_error = update_millesime_file(df, output_dir)
-        
-        if not success:
-            print(f"Erreur lors de la mise à jour des millésimes : {update_error}")
-            tracker_df = pd.concat([tracker_df, pd.DataFrame({
-                'fichier': [xml_path],
-                'date_traitement': [datetime.now()],
-                'nombre_formulaires': [len(df)],
-                'statut': ['ERREUR'],
-                'message_erreur': [f"Erreur mise à jour millésimes: {update_error}"]
-            })], ignore_index=True)
-            continue
-        
-        tracker_df = pd.concat([tracker_df, pd.DataFrame({
-            'fichier': [xml_path],
-            'date_traitement': [datetime.now()],
-            'nombre_formulaires': [len(df)],
-            'statut': ['SUCCES'],
-            'message_erreur': [""]
-        })], ignore_index=True)
-        
-        print(f"Traité avec succès : {len(df)} formulaires")
-        
-    tracker_df.to_parquet(tracker_file, index=False)
-    
-    print("\nTraitement terminé.")
-    print("\nRésumé des traitements :")
-    print(f"Fichiers traités : {len(tracker_df)}")
-    print(f"Total formulaires : {tracker_df['nombre_formulaires'].sum()}")
-    print("\nStatut des traitements :")
-    print(tracker_df['statut'].value_counts())
-
-def process_directory(directory: str, contamination: float = 0.1) -> pd.DataFrame:
-    # Lecture des données
-    all_data = pd.DataFrame()
-    directory = Path(directory)
-    
-    for file in directory.glob('*.parquet'):
+    # Lecture des fichiers
+    for file in parquet_files:
         try:
             df = pd.read_parquet(file)
-            df['source_file'] = file.name
-            all_data = pd.concat([all_data, df]) if not all_data.empty else df
+            if not df.empty:
+                df['source_file'] = file.name
+                all_data.append(df)
         except Exception as e:
             print(f"Erreur lors de la lecture de {file}: {str(e)}")
             continue
     
+    if not all_data:
+        print("Aucune donnée n'a été chargée")
+        return pd.DataFrame()
+        
+    # Concaténation des DataFrames
+    combined_data = pd.concat(all_data, ignore_index=True)
+    
     # Détection et correction des anomalies
     detector = SIRENAnomalyDetector(contamination=contamination)
-    results = detector.fit_predict(all_data)
+    results = detector.fit_predict(combined_data)
     
-    # Sauvegarde des résultats
-    anomalies_df = results[results['is_anomaly']].copy()
-    output_file = directory / "anomalies_siren_luhn.parquet"
-    anomalies_df.to_parquet(output_file)
-    
-    # Statistiques
-    print("\nSTATISTIQUES DES ANOMALIES SIREN")
-    print("=" * 50)
-    print(f"Total enregistrements analysés: {len(all_data)}")
-    print(f"Nombre d'anomalies détectées: {len(anomalies_df)}")
-    print("\nSources des corrections:")
-    print(anomalies_df['source_correction'].value_counts())
+    if output_dir:
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Sauvegarde des anomalies
+        anomalies_df = results[results['is_anomaly']].copy()
+        output_file = output_dir / "anomalies_siren_luhn.parquet"
+        anomalies_df.to_parquet(output_file)
     
     return results
 
