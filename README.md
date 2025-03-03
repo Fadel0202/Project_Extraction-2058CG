@@ -1,6 +1,6 @@
 # Extraction Project
 
-Ce package permet d’extraire des données et d’appliquer des traitements.
+Ce package permet d’extraire des données et d’appliquer des traitements sur des fichiers xml de declarations fiscal 2058CG.
 
 ## Installation
 
@@ -38,4 +38,4 @@ pytest
 
 ## Auteurs
 
-- **Mouhamed Samb** - *Développeur principal* - [fadwa.samb@gmail.com](mailto:fadwa.samb@gmail.com)
+- **Mouhamed Fadel Samb** - *Développeur principal* - [fadwa.samb@gmail.com](mailto:fadwa.samb@gmail.com)
