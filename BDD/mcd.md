@@ -81,18 +81,18 @@ erDiagram
         decimal pourcentage_evolution
     }
 
-    %% Définition des relations
-    SOCIETE ||--o{ DEPOT : "effectue"
-    ANNEE_FISCALE ||--o{ DEPOT : "appartient à"
-    DEPOT ||--o| FORMULAIRE_2058CG : "contient"
-    DEPOT ||--o{ FORMULAIRE_2069A : "contient"
+    %% Définition des relations avec cardinalités explicites
+    SOCIETE ||--o{ DEPOT : "effectue (1,n)"
+    ANNEE_FISCALE ||--o{ DEPOT : "appartient à (1,n)"
+    DEPOT ||--o{ FORMULAIRE_2058CG : "contient (0,n)"
+    DEPOT ||--o{ FORMULAIRE_2069A : "contient (0,n)"
 
-    SOCIETE ||--o{ SOCIETE_FILLE : "est mère de"
-    SOCIETE ||--o{ EVOLUTION_CIR : "suit évolution"
+    SOCIETE ||--o{ SOCIETE_FILLE : "est mère de (0,n)"
+    SOCIETE ||--o{ EVOLUTION_CIR : "suit évolution (0,n)"
 
-    FORMULAIRE_2058CG ||--o{ SOCIETE_FILLE : "déclare"
-    FORMULAIRE_2069A ||--|| ANNEXE_2069A12 : "contient"
-    FORMULAIRE_2069A ||--o{ CREDIT_IMPOT : "déclare"
+    FORMULAIRE_2058CG ||--o{ SOCIETE_FILLE : "déclare (0,n)"
+    FORMULAIRE_2069A ||--o| ANNEXE_2069A12 : "contient (0,1)"
+    FORMULAIRE_2069A ||--o{ CREDIT_IMPOT : "déclare (0,n)"
 
-    SOCIETE_FILLE ||--o{ CREDIT_IMPOT : "possède"
+    SOCIETE_FILLE ||--o{ CREDIT_IMPOT : "possède (0,n)"
 
