@@ -1,3 +1,39 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "Project_Extraction-2058CG"
+version = "0.1.0"
+description = "Projet d'extraction de données du formulaire 2058CG"
+authors = [
+    {name = "Mouhamed samb", email = "fadwa.samb@gmail.com"}
+]
+requires-python = ">=3.8"
+dependencies = [
+    "pandas",
+    "numpy",
+    "psycopg2",
+    "itables",
+    "scikit-learn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+]
+
+[tool.setuptools]
+packages = ["Project_Extraction-2058CG"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[project.scripts]
+extraction-cli = "Project_Extraction-2058CG.cli:main"
+
+
+[project.keywords]
+keywords = ["extraction", "data", "formulaire", "2058CG"]
